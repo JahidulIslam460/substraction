@@ -1,0 +1,69 @@
+name: CI/CD Pipeline for Subtraction Program
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Stage 1: Source - Checkout code
+    - name: Checkout source code
+      uses: actions/checkout@v4
+      
+    # Stage 2: Build - Compile the application
+    - name: Install dependencies
+      run: make deps
+      
+    - name: Build application
+      run: |
+        make build
+        echo "Build completed successfully!"
+        ls -la
+        
+    # Stage 3: Test - Run unit tests
+    - name: Run unit tests
+      run: |
+        make test
+        echo "All tests passed!"
+        
+    # Stage 4: Package - Create and upload artifact
+    - name: Package artifact
+      run: |
+        make package
+        echo "Artifact created successfully!"
+        
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: subtraction-program
+        path: subtraction_program.tar.gz
+        retention-days: 30
+        
+    # Stage 5: Simulated Deploy - Download artifact and use secure variable
+    - name: Download artifact for deployment
+      uses: actions/download-artifact@v4
+      with:
+        name: subtraction-program
+        
+    - name: Simulated deployment
+      run: |
+        # Verify artifact was downloaded
+        echo "Contents of current directory:"
+        ls -la
+        
+        # Extract and verify the artifact
+        tar -tzf subtraction_program.tar.gz
+        echo "Artifact verified successfully!"
+        
+        # Simulate deployment using secure environment variable
+        echo "Starting deployment process..."
+        echo "Deployment using API Key: $DEPLOY_API_KEY"
+        echo "Deploying application: subtraction"
+        echo "Deployment simulation completed successfully!"
+      env:
+        DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
