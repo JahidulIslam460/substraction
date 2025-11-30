@@ -26,17 +26,16 @@ jobs:
     # Create the C files
     - name: Create source files
       run: |
-        cat > subtraction.h << 'EOF'
-#ifndef SUBTRACTION_H
+        # Create subtraction.h
+        echo '#ifndef SUBTRACTION_H
 #define SUBTRACTION_H
 
 int subtract(int a, int b);
 
-#endif
-EOF
+#endif' > subtraction.h
 
-        cat > subtraction.c << 'EOF'
-#include <stdio.h>
+        # Create subtraction.c
+        echo '#include <stdio.h>
 #include "subtraction.h"
 
 int subtract(int a, int b) {
@@ -54,11 +53,10 @@ int main() {
     printf("15 - 8 = %d\n", subtract(15, 8));
     
     return 0;
-}
-EOF
+}' > subtraction.c
 
-        cat > test_subtraction.c << 'EOF'
-#include <stdio.h>
+        # Create test_subtraction.c
+        echo '#include <stdio.h>
 #include <assert.h>
 #include "subtraction.h"
 
@@ -73,11 +71,10 @@ void test_subtraction() {
 int main() {
     test_subtraction();
     return 0;
-}
-EOF
+}' > test_subtraction.c
 
-        cat > Makefile << 'EOF'
-CC = gcc
+        # Create Makefile
+        echo 'CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 
 TARGET = subtraction
@@ -97,8 +94,7 @@ package: build test
 clean:
 	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)
 
-.PHONY: build test package clean
-EOF
+.PHONY: build test package clean' > Makefile
 
         echo "Files created successfully:"
         ls -la *.c *.h Makefile
@@ -148,3 +144,4 @@ EOF
         echo "Deployment simulation completed successfully!"
       env:
         DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+
