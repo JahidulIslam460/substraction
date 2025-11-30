@@ -15,19 +15,27 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v4
       
+    # Debug: Show directory structure
+    - name: Show directory structure
+      run: |
+        echo "Current directory structure:"
+        ls -la
+        echo "GitHub workspace:"
+        pwd
+        
     # Stage 2: Build - Compile the application
-    - name: Install dependencies
-      run: make deps
-      
     - name: Build application
       run: |
+        echo "Building application..."
         make build
         echo "Build completed successfully!"
-        ls -la
+        echo "Built files:"
+        ls -la subtraction*
         
     # Stage 3: Test - Run unit tests
     - name: Run unit tests
       run: |
+        echo "Running tests..."
         make test
         echo "All tests passed!"
         
@@ -35,7 +43,8 @@ jobs:
     - name: Package artifact
       run: |
         make package
-        echo "Artifact created successfully!"
+        echo "Artifact contents:"
+        tar -tzf subtraction_program.tar.gz
         
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
@@ -52,18 +61,20 @@ jobs:
         
     - name: Simulated deployment
       run: |
-        # Verify artifact was downloaded
-        echo "Contents of current directory:"
+        echo "=== Deployment Phase ==="
+        echo "Current directory for deployment:"
+        pwd
         ls -la
         
-        # Extract and verify the artifact
-        tar -tzf subtraction_program.tar.gz
-        echo "Artifact verified successfully!"
+        echo "Extracting artifact..."
+        tar -xzf subtraction_program.tar.gz
+        echo "Extracted files:"
+        ls -la
         
-        # Simulate deployment using secure environment variable
-        echo "Starting deployment process..."
+        echo "Testing deployed application..."
+        ./subtraction
+        
         echo "Deployment using API Key: $DEPLOY_API_KEY"
-        echo "Deploying application: subtraction"
-        echo "Deployment simulation completed successfully!"
+        echo "✅ Deployment simulation completed successfully!"
       env:
         DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
