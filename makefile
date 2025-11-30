@@ -13,14 +13,14 @@ all: build test
 # Build the main program
 build: $(TARGET)
 
-$(TARGET): subtraction.c subtraction.h
+$(TARGET):
 	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c
 
 # Build and run tests
 test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-$(TEST_TARGET): test_subtraction.c subtraction.c subtraction.h
+$(TEST_TARGET):
 	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c
 
 # Create deployable artifact
@@ -33,3 +33,4 @@ clean:
 	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)
 
 .PHONY: all build test package clean
+
