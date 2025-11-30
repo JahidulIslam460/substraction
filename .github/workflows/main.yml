@@ -34,28 +34,15 @@ jobs:
         echo '' >> subtraction.h
         echo '#endif' >> subtraction.h
 
-        # Create subtraction.c line by line
+        # Create subtraction.c WITHOUT main function
         echo '#include <stdio.h>' > subtraction.c
         echo '#include "subtraction.h"' >> subtraction.c
         echo '' >> subtraction.c
         echo 'int subtract(int a, int b) {' >> subtraction.c
         echo '    return a - b;' >> subtraction.c
         echo '}' >> subtraction.c
-        echo '' >> subtraction.c
-        echo 'int main() {' >> subtraction.c
-        echo '    int num1 = 10;' >> subtraction.c
-        echo '    int num2 = 5;' >> subtraction.c
-        echo '    ' >> subtraction.c
-        echo '    printf("Subtraction Program\\n");' >> subtraction.c
-        echo '    printf("===================\\n");' >> subtraction.c
-        echo '    printf("%d - %d = %d\\n", num1, num2, subtract(num1, num2));' >> subtraction.c
-        echo '    printf("7 - 3 = %d\\n", subtract(7, 3));' >> subtraction.c
-        echo '    printf("15 - 8 = %d\\n", subtract(15, 8));' >> subtraction.c
-        echo '    ' >> subtraction.c
-        echo '    return 0;' >> subtraction.c
-        echo '}' >> subtraction.c
 
-        # Create test_subtraction.c line by line
+        # Create test_subtraction.c WITH main function for tests
         echo '#include <stdio.h>' > test_subtraction.c
         echo '#include <assert.h>' >> test_subtraction.c
         echo '#include "subtraction.h"' >> test_subtraction.c
@@ -73,7 +60,24 @@ jobs:
         echo '    return 0;' >> test_subtraction.c
         echo '}' >> test_subtraction.c
 
-        # Create Makefile line by line
+        # Create main.c for the actual program
+        echo '#include <stdio.h>' > main.c
+        echo '#include "subtraction.h"' >> main.c
+        echo '' >> main.c
+        echo 'int main() {' >> main.c
+        echo '    int num1 = 10;' >> main.c
+        echo '    int num2 = 5;' >> main.c
+        echo '    ' >> main.c
+        echo '    printf("Subtraction Program\\n");' >> main.c
+        echo '    printf("===================\\n");' >> main.c
+        echo '    printf("%d - %d = %d\\n", num1, num2, subtract(num1, num2));' >> main.c
+        echo '    printf("7 - 3 = %d\\n", subtract(7, 3));' >> main.c
+        echo '    printf("15 - 8 = %d\\n", subtract(15, 8));' >> main.c
+        echo '    ' >> main.c
+        echo '    return 0;' >> main.c
+        echo '}' >> main.c
+
+        # Create Makefile
         echo 'CC = gcc' > Makefile
         echo 'CFLAGS = -Wall -Wextra -std=c99' >> Makefile
         echo '' >> Makefile
@@ -82,14 +86,14 @@ jobs:
         echo 'ARTIFACT = subtraction_program.tar.gz' >> Makefile
         echo '' >> Makefile
         echo 'build:' >> Makefile
-        echo '	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c' >> Makefile
+        echo '	$(CC) $(CFLAGS) -o $(TARGET) main.c subtraction.c' >> Makefile
         echo '' >> Makefile
-        echo 'test: build' >> Makefile
+        echo 'test:' >> Makefile
         echo '	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c' >> Makefile
         echo '	./$(TEST_TARGET)' >> Makefile
         echo '' >> Makefile
         echo 'package: build test' >> Makefile
-        echo '	tar -czf $(ARTIFACT) $(TARGET) subtraction.c subtraction.h test_subtraction.c Makefile' >> Makefile
+        echo '	tar -czf $(ARTIFACT) $(TARGET) main.c subtraction.c subtraction.h test_subtraction.c Makefile' >> Makefile
         echo '' >> Makefile
         echo 'clean:' >> Makefile
         echo '	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)' >> Makefile
@@ -103,7 +107,7 @@ jobs:
     - name: Build application
       run: |
         echo "Building application..."
-        gcc -Wall -Wextra -std=c99 -o subtraction subtraction.c
+        gcc -Wall -Wextra -std=c99 -o subtraction main.c subtraction.c
         echo "Build completed successfully!"
         
     # Stage 3: Test - Run unit tests
@@ -117,7 +121,7 @@ jobs:
     # Stage 4: Package - Create and upload artifact
     - name: Package artifact
       run: |
-        tar -czf subtraction_program.tar.gz subtraction subtraction.c subtraction.h test_subtraction.c Makefile
+        tar -czf subtraction_program.tar.gz subtraction main.c subtraction.c subtraction.h test_subtraction.c Makefile
         echo "Artifact created successfully!"
         
     - name: Upload build artifact
