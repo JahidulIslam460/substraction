@@ -67,7 +67,7 @@ void test_subtraction() {
     assert(subtract(5, 10) == -5);
     assert(subtract(10, 0) == 10);
     assert(subtract(7, 7) == 0);
-    printf("All tests passed! ✅\n");
+    printf("All tests passed! \u2705\n");
 }
 
 int main() {
@@ -145,6 +145,6 @@ EOF
         echo "Deploying application..."
         ./subtraction
         echo "Deployment using API Key: $DEPLOY_API_KEY"
-        echo "✅ Deployment simulation completed successfully!"
+        echo "Deployment simulation completed successfully!"
       env:
         DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
