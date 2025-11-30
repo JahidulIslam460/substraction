@@ -23,78 +23,78 @@ jobs:
         echo "All files in repository:"
         find . -type f -name "*" | head -20
         
-    # Create the C files
+    # Create the C files using individual commands
     - name: Create source files
       run: |
-        # Create subtraction.h
-        echo '#ifndef SUBTRACTION_H
-#define SUBTRACTION_H
+        # Create subtraction.h line by line
+        echo '#ifndef SUBTRACTION_H' > subtraction.h
+        echo '#define SUBTRACTION_H' >> subtraction.h
+        echo '' >> subtraction.h
+        echo 'int subtract(int a, int b);' >> subtraction.h
+        echo '' >> subtraction.h
+        echo '#endif' >> subtraction.h
 
-int subtract(int a, int b);
+        # Create subtraction.c line by line
+        echo '#include <stdio.h>' > subtraction.c
+        echo '#include "subtraction.h"' >> subtraction.c
+        echo '' >> subtraction.c
+        echo 'int subtract(int a, int b) {' >> subtraction.c
+        echo '    return a - b;' >> subtraction.c
+        echo '}' >> subtraction.c
+        echo '' >> subtraction.c
+        echo 'int main() {' >> subtraction.c
+        echo '    int num1 = 10;' >> subtraction.c
+        echo '    int num2 = 5;' >> subtraction.c
+        echo '    ' >> subtraction.c
+        echo '    printf("Subtraction Program\\n");' >> subtraction.c
+        echo '    printf("===================\\n");' >> subtraction.c
+        echo '    printf("%d - %d = %d\\n", num1, num2, subtract(num1, num2));' >> subtraction.c
+        echo '    printf("7 - 3 = %d\\n", subtract(7, 3));' >> subtraction.c
+        echo '    printf("15 - 8 = %d\\n", subtract(15, 8));' >> subtraction.c
+        echo '    ' >> subtraction.c
+        echo '    return 0;' >> subtraction.c
+        echo '}' >> subtraction.c
 
-#endif' > subtraction.h
+        # Create test_subtraction.c line by line
+        echo '#include <stdio.h>' > test_subtraction.c
+        echo '#include <assert.h>' >> test_subtraction.c
+        echo '#include "subtraction.h"' >> test_subtraction.c
+        echo '' >> test_subtraction.c
+        echo 'void test_subtraction() {' >> test_subtraction.c
+        echo '    assert(subtract(10, 5) == 5);' >> test_subtraction.c
+        echo '    assert(subtract(5, 10) == -5);' >> test_subtraction.c
+        echo '    assert(subtract(10, 0) == 10);' >> test_subtraction.c
+        echo '    assert(subtract(7, 7) == 0);' >> test_subtraction.c
+        echo '    printf("All tests passed!\\n");' >> test_subtraction.c
+        echo '}' >> test_subtraction.c
+        echo '' >> test_subtraction.c
+        echo 'int main() {' >> test_subtraction.c
+        echo '    test_subtraction();' >> test_subtraction.c
+        echo '    return 0;' >> test_subtraction.c
+        echo '}' >> test_subtraction.c
 
-        # Create subtraction.c
-        echo '#include <stdio.h>
-#include "subtraction.h"
-
-int subtract(int a, int b) {
-    return a - b;
-}
-
-int main() {
-    int num1 = 10;
-    int num2 = 5;
-    
-    printf("Subtraction Program\n");
-    printf("===================\n");
-    printf("%d - %d = %d\n", num1, num2, subtract(num1, num2));
-    printf("7 - 3 = %d\n", subtract(7, 3));
-    printf("15 - 8 = %d\n", subtract(15, 8));
-    
-    return 0;
-}' > subtraction.c
-
-        # Create test_subtraction.c
-        echo '#include <stdio.h>
-#include <assert.h>
-#include "subtraction.h"
-
-void test_subtraction() {
-    assert(subtract(10, 5) == 5);
-    assert(subtract(5, 10) == -5);
-    assert(subtract(10, 0) == 10);
-    assert(subtract(7, 7) == 0);
-    printf("All tests passed!\n");
-}
-
-int main() {
-    test_subtraction();
-    return 0;
-}' > test_subtraction.c
-
-        # Create Makefile
-        echo 'CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
-
-TARGET = subtraction
-TEST_TARGET = test_subtraction
-ARTIFACT = subtraction_program.tar.gz
-
-build:
-	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c
-
-test: build
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c
-	./$(TEST_TARGET)
-
-package: build test
-	tar -czf $(ARTIFACT) $(TARGET) subtraction.c subtraction.h test_subtraction.c Makefile
-
-clean:
-	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)
-
-.PHONY: build test package clean' > Makefile
+        # Create Makefile line by line
+        echo 'CC = gcc' > Makefile
+        echo 'CFLAGS = -Wall -Wextra -std=c99' >> Makefile
+        echo '' >> Makefile
+        echo 'TARGET = subtraction' >> Makefile
+        echo 'TEST_TARGET = test_subtraction' >> Makefile
+        echo 'ARTIFACT = subtraction_program.tar.gz' >> Makefile
+        echo '' >> Makefile
+        echo 'build:' >> Makefile
+        echo '	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c' >> Makefile
+        echo '' >> Makefile
+        echo 'test: build' >> Makefile
+        echo '	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c' >> Makefile
+        echo '	./$(TEST_TARGET)' >> Makefile
+        echo '' >> Makefile
+        echo 'package: build test' >> Makefile
+        echo '	tar -czf $(ARTIFACT) $(TARGET) subtraction.c subtraction.h test_subtraction.c Makefile' >> Makefile
+        echo '' >> Makefile
+        echo 'clean:' >> Makefile
+        echo '	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)' >> Makefile
+        echo '' >> Makefile
+        echo '.PHONY: build test package clean' >> Makefile
 
         echo "Files created successfully:"
         ls -la *.c *.h Makefile
@@ -144,4 +144,3 @@ clean:
         echo "Deployment simulation completed successfully!"
       env:
         DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-
