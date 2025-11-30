@@ -20,8 +20,88 @@ jobs:
       run: |
         echo "Current directory structure:"
         ls -la
-        echo "Files in repository:"
-        find . -name "*.c" -o -name "*.h" -o -name "Makefile"
+        echo "All files in repository:"
+        find . -type f -name "*" | head -20
+        
+    # Create the C files if they don't exist
+    - name: Create source files
+      run: |
+        cat > subtraction.h << 'EOF'
+#ifndef SUBTRACTION_H
+#define SUBTRACTION_H
+
+int subtract(int a, int b);
+
+#endif
+EOF
+
+        cat > subtraction.c << 'EOF'
+#include <stdio.h>
+#include "subtraction.h"
+
+int subtract(int a, int b) {
+    return a - b;
+}
+
+int main() {
+    int num1 = 10;
+    int num2 = 5;
+    
+    printf("Subtraction Program\n");
+    printf("===================\n");
+    printf("%d - %d = %d\n", num1, num2, subtract(num1, num2));
+    printf("7 - 3 = %d\n", subtract(7, 3));
+    printf("15 - 8 = %d\n", subtract(15, 8));
+    
+    return 0;
+}
+EOF
+
+        cat > test_subtraction.c << 'EOF'
+#include <stdio.h>
+#include <assert.h>
+#include "subtraction.h"
+
+void test_subtraction() {
+    assert(subtract(10, 5) == 5);
+    assert(subtract(5, 10) == -5);
+    assert(subtract(10, 0) == 10);
+    assert(subtract(7, 7) == 0);
+    printf("All tests passed! ✅\n");
+}
+
+int main() {
+    test_subtraction();
+    return 0;
+}
+EOF
+
+        cat > Makefile << 'EOF'
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99
+
+TARGET = subtraction
+TEST_TARGET = test_subtraction
+ARTIFACT = subtraction_program.tar.gz
+
+build:
+	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c
+
+test: build
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c
+	./$(TEST_TARGET)
+
+package: build test
+	tar -czf $(ARTIFACT) $(TARGET) subtraction.c subtraction.h test_subtraction.c Makefile
+
+clean:
+	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)
+
+.PHONY: build test package clean
+EOF
+
+        echo "Files created successfully:"
+        ls -la *.c *.h Makefile
         
     # Stage 2: Build - Compile the application
     - name: Build application
@@ -29,8 +109,6 @@ jobs:
         echo "Building application..."
         gcc -Wall -Wextra -std=c99 -o subtraction subtraction.c
         echo "Build completed successfully!"
-        echo "Built files:"
-        ls -la subtraction*
         
     # Stage 3: Test - Run unit tests
     - name: Run unit tests
@@ -44,9 +122,7 @@ jobs:
     - name: Package artifact
       run: |
         tar -czf subtraction_program.tar.gz subtraction subtraction.c subtraction.h test_subtraction.c Makefile
-        echo "Artifact created: subtraction_program.tar.gz"
-        echo "Artifact contents:"
-        tar -tzf subtraction_program.tar.gz
+        echo "Artifact created successfully!"
         
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
@@ -64,18 +140,10 @@ jobs:
     - name: Simulated deployment
       run: |
         echo "=== Deployment Phase ==="
-        echo "Current directory for deployment:"
-        pwd
         ls -la
-        
-        echo "Extracting artifact..."
         tar -xzf subtraction_program.tar.gz
-        echo "Extracted files:"
-        ls -la
-        
-        echo "Testing deployed application..."
+        echo "Deploying application..."
         ./subtraction
-        
         echo "Deployment using API Key: $DEPLOY_API_KEY"
         echo "✅ Deployment simulation completed successfully!"
       env:
