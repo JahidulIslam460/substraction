@@ -20,14 +20,14 @@ jobs:
       run: |
         echo "Current directory structure:"
         ls -la
-        echo "GitHub workspace:"
-        pwd
+        echo "Files in repository:"
+        find . -name "*.c" -o -name "*.h" -o -name "Makefile"
         
     # Stage 2: Build - Compile the application
     - name: Build application
       run: |
         echo "Building application..."
-        make build
+        gcc -Wall -Wextra -std=c99 -o subtraction subtraction.c
         echo "Build completed successfully!"
         echo "Built files:"
         ls -la subtraction*
@@ -36,13 +36,15 @@ jobs:
     - name: Run unit tests
       run: |
         echo "Running tests..."
-        make test
+        gcc -Wall -Wextra -std=c99 -o test_subtraction test_subtraction.c subtraction.c
+        ./test_subtraction
         echo "All tests passed!"
         
     # Stage 4: Package - Create and upload artifact
     - name: Package artifact
       run: |
-        make package
+        tar -czf subtraction_program.tar.gz subtraction subtraction.c subtraction.h test_subtraction.c Makefile
+        echo "Artifact created: subtraction_program.tar.gz"
         echo "Artifact contents:"
         tar -tzf subtraction_program.tar.gz
         
