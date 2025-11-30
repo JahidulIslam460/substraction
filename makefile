@@ -6,9 +6,6 @@ CFLAGS = -Wall -Wextra -std=c99
 TARGET = subtraction
 TEST_TARGET = test_subtraction
 ARTIFACT = subtraction_program.tar.gz
-SOURCES = subtraction.c
-HEADERS = subtraction.h
-TEST_SOURCES = test_subtraction.c
 
 # Default target
 all: build test
@@ -16,31 +13,23 @@ all: build test
 # Build the main program
 build: $(TARGET)
 
-$(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES)
+$(TARGET): subtraction.c subtraction.h
+	$(CC) $(CFLAGS) -o $(TARGET) subtraction.c
 
 # Build and run tests
 test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-$(TEST_TARGET): $(TEST_SOURCES) $(SOURCES) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(TEST_SOURCES) $(SOURCES)
+$(TEST_TARGET): test_subtraction.c subtraction.c subtraction.h
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c
 
 # Create deployable artifact
 package: build test
-	tar -czf $(ARTIFACT) $(TARGET) $(SOURCES) $(HEADERS) $(TEST_SOURCES) Makefile
+	tar -czf $(ARTIFACT) $(TARGET) subtraction.c subtraction.h test_subtraction.c Makefile
 	@echo "Artifact created: $(ARTIFACT)"
-	@echo "Contents:"
-	@tar -tzf $(ARTIFACT)
 
 # Clean build artifacts
 clean:
 	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)
 
-# Install dependencies (simulated)
-deps:
-	@echo "Installing build dependencies..."
-	@echo "gcc version:"
-	@gcc --version
-
-.PHONY: all build test package clean deps
+.PHONY: all build test package clean
