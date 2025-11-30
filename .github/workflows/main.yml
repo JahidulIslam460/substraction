@@ -23,7 +23,7 @@ jobs:
         echo "All files in repository:"
         find . -type f -name "*" | head -20
         
-    # Create the C files if they don't exist
+    # Create the C files
     - name: Create source files
       run: |
         cat > subtraction.h << 'EOF'
@@ -67,7 +67,7 @@ void test_subtraction() {
     assert(subtract(5, 10) == -5);
     assert(subtract(10, 0) == 10);
     assert(subtract(7, 7) == 0);
-    printf("All tests passed! \u2705\n");
+    printf("All tests passed!\n");
 }
 
 int main() {
