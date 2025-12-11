@@ -1,150 +1,32 @@
-name: CI/CD Pipeline for Subtraction Program
+name: CI-CD for C Project
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
-  ci-pipeline:
+  build-test-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    # Stage 1: Source - Checkout code
-    - name: Checkout source code
-      uses: actions/checkout@v4
-      
-    # Debug: Show directory structure
-    - name: Show directory structure
-      run: |
-        echo "Current directory structure:"
-        ls -la
-        echo "All files in repository:"
-        find . -type f -name "*" | head -20
-        
-    # Create the C files using individual commands
-    - name: Create source files
-      run: |
-        # Create subtraction.h line by line
-        echo '#ifndef SUBTRACTION_H' > subtraction.h
-        echo '#define SUBTRACTION_H' >> subtraction.h
-        echo '' >> subtraction.h
-        echo 'int subtract(int a, int b);' >> subtraction.h
-        echo '' >> subtraction.h
-        echo '#endif' >> subtraction.h
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-        # Create subtraction.c WITHOUT main function
-        echo '#include <stdio.h>' > subtraction.c
-        echo '#include "subtraction.h"' >> subtraction.c
-        echo '' >> subtraction.c
-        echo 'int subtract(int a, int b) {' >> subtraction.c
-        echo '    return a - b;' >> subtraction.c
-        echo '}' >> subtraction.c
+    - name: Install GCC
+      run: sudo apt-get install -y gcc
 
-        # Create test_subtraction.c WITH main function for tests
-        echo '#include <stdio.h>' > test_subtraction.c
-        echo '#include <assert.h>' >> test_subtraction.c
-        echo '#include "subtraction.h"' >> test_subtraction.c
-        echo '' >> test_subtraction.c
-        echo 'void test_subtraction() {' >> test_subtraction.c
-        echo '    assert(subtract(10, 5) == 5);' >> test_subtraction.c
-        echo '    assert(subtract(5, 10) == -5);' >> test_subtraction.c
-        echo '    assert(subtract(10, 0) == 10);' >> test_subtraction.c
-        echo '    assert(subtract(7, 7) == 0);' >> test_subtraction.c
-        echo '    printf("All tests passed!\\n");' >> test_subtraction.c
-        echo '}' >> test_subtraction.c
-        echo '' >> test_subtraction.c
-        echo 'int main() {' >> test_subtraction.c
-        echo '    test_subtraction();' >> test_subtraction.c
-        echo '    return 0;' >> test_subtraction.c
-        echo '}' >> test_subtraction.c
-
-        # Create main.c for the actual program
-        echo '#include <stdio.h>' > main.c
-        echo '#include "subtraction.h"' >> main.c
-        echo '' >> main.c
-        echo 'int main() {' >> main.c
-        echo '    int num1 = 10;' >> main.c
-        echo '    int num2 = 5;' >> main.c
-        echo '    ' >> main.c
-        echo '    printf("Subtraction Program\\n");' >> main.c
-        echo '    printf("===================\\n");' >> main.c
-        echo '    printf("%d - %d = %d\\n", num1, num2, subtract(num1, num2));' >> main.c
-        echo '    printf("7 - 3 = %d\\n", subtract(7, 3));' >> main.c
-        echo '    printf("15 - 8 = %d\\n", subtract(15, 8));' >> main.c
-        echo '    ' >> main.c
-        echo '    return 0;' >> main.c
-        echo '}' >> main.c
-
-        # Create Makefile
-        echo 'CC = gcc' > Makefile
-        echo 'CFLAGS = -Wall -Wextra -std=c99' >> Makefile
-        echo '' >> Makefile
-        echo 'TARGET = subtraction' >> Makefile
-        echo 'TEST_TARGET = test_subtraction' >> Makefile
-        echo 'ARTIFACT = subtraction_program.tar.gz' >> Makefile
-        echo '' >> Makefile
-        echo 'build:' >> Makefile
-        echo '	$(CC) $(CFLAGS) -o $(TARGET) main.c subtraction.c' >> Makefile
-        echo '' >> Makefile
-        echo 'test:' >> Makefile
-        echo '	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_subtraction.c subtraction.c' >> Makefile
-        echo '	./$(TEST_TARGET)' >> Makefile
-        echo '' >> Makefile
-        echo 'package: build test' >> Makefile
-        echo '	tar -czf $(ARTIFACT) $(TARGET) main.c subtraction.c subtraction.h test_subtraction.c Makefile' >> Makefile
-        echo '' >> Makefile
-        echo 'clean:' >> Makefile
-        echo '	rm -f $(TARGET) $(TEST_TARGET) $(ARTIFACT)' >> Makefile
-        echo '' >> Makefile
-        echo '.PHONY: build test package clean' >> Makefile
-
-        echo "Files created successfully:"
-        ls -la *.c *.h Makefile
-        
-    # Stage 2: Build - Compile the application
-    - name: Build application
+    - name: Compile Code
       run: |
-        echo "Building application..."
-        gcc -Wall -Wextra -std=c99 -o subtraction main.c subtraction.c
-        echo "Build completed successfully!"
-        
-    # Stage 3: Test - Run unit tests
-    - name: Run unit tests
-      run: |
-        echo "Running tests..."
-        gcc -Wall -Wextra -std=c99 -o test_subtraction test_subtraction.c subtraction.c
-        ./test_subtraction
-        echo "All tests passed!"
-        
-    # Stage 4: Package - Create and upload artifact
-    - name: Package artifact
-      run: |
-        tar -czf subtraction_program.tar.gz subtraction main.c subtraction.c subtraction.h test_subtraction.c Makefile
-        echo "Artifact created successfully!"
-        
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
+        gcc subtraction.c test_subtraction.c -o test_program
+
+    - name: Run Tests
+      run: ./test_program
+
+    # CD: Upload the compiled file as an artifact  
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v3
       with:
-        name: subtraction-program
-        path: subtraction_program.tar.gz
-        retention-days: 30
-        
-    # Stage 5: Simulated Deploy - Download artifact and use secure variable
-    - name: Download artifact for deployment
-      uses: actions/download-artifact@v4
-      with:
-        name: subtraction-program
-        
-    - name: Simulated deployment
-      run: |
-        echo "=== Deployment Phase ==="
-        ls -la
-        tar -xzf subtraction_program.tar.gz
-        echo "Deploying application..."
-        ./subtraction
-        echo "Deployment using API Key: $DEPLOY_API_KEY"
-        echo "Deployment simulation completed successfully!"
-      env:
-        DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+        name: c-program-binary
+        path: test_program
