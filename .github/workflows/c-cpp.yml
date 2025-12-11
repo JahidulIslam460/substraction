@@ -1,0 +1,32 @@
+name: CI-CD for C Project
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Install GCC
+      run: sudo apt-get install -y gcc
+
+    - name: Compile Code
+      run: |
+        gcc subtraction.c test_subtraction.c -o test_program
+
+    - name: Run Tests
+      run: ./test_program
+
+    # CD: Upload the compiled file as an artifact  
+    - name: Upload Binary Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: c-program-binary
+        path: test_program
